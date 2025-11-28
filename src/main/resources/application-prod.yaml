@@ -1,0 +1,22 @@
+spring:
+
+  application:
+    name:
+      wise-task-event
+  security:
+    jwt:
+      public-key: classpath:certs/public.pem
+  r2dbc:
+    username: wise_task_event
+    password: wise_task_event
+    url: r2dbc:postgresql://wise-task-event-db:5433/wise_task_event
+    pool:
+      enabled: true
+
+logging:
+  level:
+    org.springframework.security: DEBUG
+    org.springframework.web: TRACE
+
+server:
+  port: 8085
