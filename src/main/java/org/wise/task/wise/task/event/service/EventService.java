@@ -3,7 +3,9 @@ package org.wise.task.wise.task.event.service;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.wise.task.wise.task.event.dto.CreateEventRequest;
+import org.wise.task.wise.task.event.dto.CreateEventTypeRequest;
 import org.wise.task.wise.task.event.entity.Event;
+import org.wise.task.wise.task.event.entity.EventType;
 import org.wise.task.wise.task.event.entity.Session;
 import org.wise.task.wise.task.event.repository.EventRepository;
 import org.wise.task.wise.task.event.repository.EventTypeRepository;
@@ -41,5 +43,9 @@ public class EventService {
                     return eventRepository.save(event);
                 })
                 .then();
+    }
+    public Mono<Void> createEventType(CreateEventTypeRequest request) {
+        var eventType = EventType.builder().event_name(request.getEventName()).build();
+        return eventTypeRepository.save(eventType).then();
     }
 }

@@ -1,8 +1,10 @@
 package org.wise.task.wise.task.event.entity;
 
 
-import org.springframework.data.relational.core.mapping.Column;
+import lombok.Builder;
 
+
+@Builder
 public class EventType {
     Integer id;
     String event_name;

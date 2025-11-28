@@ -7,6 +7,7 @@ import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 import org.wise.task.wise.task.event.dto.CreateEventRequest;
+import org.wise.task.wise.task.event.dto.CreateEventTypeRequest;
 import org.wise.task.wise.task.event.service.EventService;
 import reactor.core.publisher.Mono;
 
@@ -27,7 +28,8 @@ public class EventController {
 
     @PreAuthorize("hasRole(\"ADMIN\")")
     @PostMapping("/type/create")
-    public void createEventType(){
+    public Mono<Void> createEventType(CreateEventTypeRequest request){
+        return eventService.createEventType(request);
 
     }
 }
