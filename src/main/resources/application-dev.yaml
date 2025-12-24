@@ -12,7 +12,10 @@ spring:
     url: r2dbc:postgresql://localhost:5433/wise_task_event
     pool:
       enabled: true
-
+  cache:
+    caffeine:
+      spec: maximumSize=1000,expireAfterWrite=10m
+    cache-names: statistics
 logging:
   level:
     org.springframework.security: DEBUG
