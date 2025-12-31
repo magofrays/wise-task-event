@@ -3,6 +3,8 @@ package ru.leti.wise.task.event.entity;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Value;
+import org.springframework.data.annotation.Id;
+import org.springframework.data.relational.core.mapping.Column;
 
 import java.sql.Timestamp;
 import java.util.UUID;
@@ -11,8 +13,12 @@ import java.util.UUID;
 @Builder
 @AllArgsConstructor
 public class Session {
+    @Id
     UUID id;
-    UUID user_id;
-    UUID task_id;
-    Timestamp created_at;
+    @Column("user_id")
+    UUID userId;
+    @Column("task_id")
+    UUID taskId;
+    @Column("created_at")
+    Timestamp createdAt;
 }

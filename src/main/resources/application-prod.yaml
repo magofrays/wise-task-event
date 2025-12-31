@@ -1,5 +1,4 @@
 spring:
-
   application:
     name:
       wise-task-event
@@ -12,11 +11,25 @@ spring:
     url: r2dbc:postgresql://wise-task-event-db:5433/wise_task_event
     pool:
       enabled: true
+  cache:
+    caffeine:
+      spec: maximumSize=1000,expireAfterWrite=5m
+    cache-names: statistics
+  liquibase:
+    url: jdbc:postgresql://wise-task-event-db:5433/wise_task_event
+    user: wise_task_event
+    password: wise_task_event
+    change-log: classpath:liquibase/changelog-master.yml
+    enabled: true
 
 logging:
   level:
-    org.springframework.security: DEBUG
-    org.springframework.web: TRACE
+    org.springframework.security: INFO
+    org.springframework.web: INFO
+
+wise-task-event:
+  statistics:
+    time-to-live: 3600
 
 server:
   port: 8085

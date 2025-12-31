@@ -1,39 +1,18 @@
 syntax = "proto3";
 package ru.leti.wise.task.event;
 
-import "google/protobuf/empty.proto";
 import "google/protobuf/timestamp.proto";
 
 service StatisticsService{
-  rpc GetSuccessRate(SuccessRateRequest) returns (StatisticResponse) {};
-  rpc GetSum(SumRequest) returns (StatisticResponse) {};
-  rpc GetMean(MeanRequest) returns (StatisticResponse){};
+  rpc getStatistic(StatisticRequest) returns (StatisticResponse) {};
 }
 
-message MeanRequest{
-  string event_type = 1;
-  oneof entity{
-    string task_id = 2;
-    string user_id = 3;
-  }
-}
-
-message SumRequest{
-  string event_type = 1;
-  oneof relyOn {
-    string task_id = 2;
-    string user_id = 3;
-    Session session = 4;
-  }
-}
-
-
-message SuccessRateRequest {
-  oneof relyOn {
-    string task_id = 1;
-    string user_id = 2;
-    Session session = 3;
-  }
+message StatisticRequest{
+    StatisticType type = 1;
+    StatisticScope scope = 2;
+    string event_type = 3;
+    optional string task_id = 4;
+    optional string user_id = 5;
 }
 
 message Session{
@@ -49,16 +28,16 @@ message StatisticResponse{
   oneof relyOn{
     string task_id = 4;
     string user_id = 5;
-    Session session = 6;
   }
-  double value = 7;
-  string event_type = 8;
+  double value = 6;
+  string event_type = 7;
 }
 
 enum StatisticScope {
   USER = 0;
   TASK = 1;
   SESSION = 2;
+  GLOBAL = 3;
 }
 
 enum StatisticType {
