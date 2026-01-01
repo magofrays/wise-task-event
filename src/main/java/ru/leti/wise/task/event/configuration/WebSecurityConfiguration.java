@@ -33,6 +33,7 @@ public class WebSecurityConfiguration {
     @Order(1)
     public SecurityWebFilterChain securityFilterChain(ServerHttpSecurity http) {
         return http
+                .cors(ServerHttpSecurity.CorsSpec::disable)
                 .csrf(ServerHttpSecurity.CsrfSpec::disable)
                 .exceptionHandling(exceptions -> exceptions
                         .authenticationEntryPoint((exchange, ex) -> ServerResponse.status(401)
@@ -53,8 +54,11 @@ public class WebSecurityConfiguration {
     @Order(2)
     public SecurityWebFilterChain grpcSecurity(ServerHttpSecurity http) {
         return http
+                .cors(ServerHttpSecurity.CorsSpec::disable)
                 .securityMatcher(ServerWebExchangeMatchers.pathMatchers("/grpc/**"))
                 .authorizeExchange(exchanges -> exchanges.anyExchange().permitAll())
                 .build();
     }
+
+
 }
