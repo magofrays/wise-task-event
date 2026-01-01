@@ -19,13 +19,18 @@ spring:
     url: jdbc:postgresql://wise-task-event-db:5433/wise_task_event
     user: wise_task_event
     password: wise_task_event
-    change-log: classpath:liquibase/changelog-master.yml
+    change-log: classpath:liquibase/change-log-master.yaml
     enabled: true
 
 logging:
   level:
     org.springframework.security: INFO
     org.springframework.web: INFO
+
+grpc:
+  server:
+    port: 6569
+    reflection-service-enabled: true
 
 wise-task-event:
   statistics:

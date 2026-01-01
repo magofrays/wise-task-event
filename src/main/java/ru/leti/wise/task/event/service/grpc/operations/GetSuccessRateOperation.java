@@ -1,19 +1,14 @@
-package ru.leti.wise.task.event.service.operations;
+package ru.leti.wise.task.event.service.grpc.operations;
 
-import com.fasterxml.jackson.databind.JsonNode;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
-import ru.leti.wise.task.event.mapper.StatisticMapper;
 import ru.leti.wise.task.event.repository.EventRepository;
 
-import java.sql.Timestamp;
 import java.time.Instant;
-import java.util.Map;
-import java.util.Objects;
 import java.util.UUID;
 
 import static ru.leti.wise.task.event.Statistic.*;
-import static ru.leti.wise.task.event.service.operations.GetSumOperation.extractTotalSum;
+import static ru.leti.wise.task.event.service.grpc.operations.GetSumOperation.extractTotalSum;
 
 
 @Component
@@ -28,6 +23,9 @@ public class GetSuccessRateOperation {
         var wrongData = eventRepository.getEventCount("task_wrong", from, taskId, userId).collectList().block();
         double success = extractTotalSum(successData);
         double wrong = extractTotalSum(wrongData);
+        if(success == 0){
+            return 0.0;
+        }
         return 100 * success / (success + wrong);
     }
 

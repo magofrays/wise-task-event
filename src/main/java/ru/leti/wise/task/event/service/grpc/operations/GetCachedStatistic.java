@@ -1,4 +1,4 @@
-package ru.leti.wise.task.event.service.operations;
+package ru.leti.wise.task.event.service.grpc.operations;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.cache.annotation.Cacheable;
@@ -9,6 +9,7 @@ import ru.leti.wise.task.event.entity.StatisticEntity;
 import ru.leti.wise.task.event.exception.BusinessException;
 import ru.leti.wise.task.event.exception.ErrorCode;
 import ru.leti.wise.task.event.mapper.StatisticMapper;
+import ru.leti.wise.task.event.repository.EventTypeRepository;
 import ru.leti.wise.task.event.repository.StatisticRepository;
 
 import java.time.Duration;
@@ -25,6 +26,7 @@ public class GetCachedStatistic {
     private final GetMeanOperation meanOperation;
     private final StatisticRepository statisticRepository;
     private final StatisticMapper statisticMapper;
+    private final EventTypeRepository eventTypeRepository;
 
     @Cacheable(value = "statistics", key = "{#request.type, #request.scope, #request.eventType, #request.taskId, #request.userId}")
     public Statistic.StatisticResponse getCachedStatistic(Statistic.StatisticRequest request){
@@ -32,48 +34,65 @@ public class GetCachedStatistic {
         return statisticEntity.map(entity -> {
             Duration diff = Duration.between(entity.getUpdatedAt(), Instant.now());
             if(diff.getSeconds() > statisticsProperties.getTimeToLive()) {
-                entity.setValue(
-                        calculateStatistics(request, entity.getUpdatedAt())
-                );
+                calculateStatistics(request, entity, entity.getUpdatedAt());
                 entity.setUpdatedAt(Instant.now());
                 statisticRepository.save(entity).block();
             }
             return statisticMapper.toResponse(entity);
         }).orElseGet( () -> {
-            var statisticBuilder = StatisticEntity.builder();
-            statisticBuilder.scope(request.getScope());
-            statisticBuilder.type(request.getType());
-            statisticBuilder.value(
-                    calculateStatistics(request, null)
-            );
-            statisticBuilder.eventType(request.getEventType());
-            statisticBuilder.updatedAt(Instant.now());
+            var entity = StatisticEntity.builder().build();
+            entity.setScope(request.getScope());
+            entity.setType(request.getType());
+            calculateStatistics(request, entity, null);
+            entity.setUpdatedAt(Instant.now());
             if(request.hasTaskId()){
-                statisticBuilder.taskId(UUID.fromString(request.getTaskId()));
+                entity.setTaskId(UUID.fromString(request.getTaskId()));
             }
             if(request.hasUserId()){
-                statisticBuilder.userId(UUID.fromString(request.getUserId()));
+                entity.setUserId(UUID.fromString(request.getUserId()));
             }
-            var entity = statisticRepository.save(statisticBuilder.build()).block();
+            entity = statisticRepository.save(entity).block();
             return statisticMapper.toResponse(entity);
         });
     }
 
-    public Double calculateStatistics(Statistic.StatisticRequest request, Instant from){
+    public void calculateStatistics(Statistic.StatisticRequest request, StatisticEntity entity, Instant from){
         switch (request.getType()){
             case SUM -> {
-                return sumOperation.execute(request, from);
+                entity.setValue(sumOperation.execute(request, from));
+                if(entity.getEventType() == null){
+                    validateEventType(request);
+                    entity.setEventType(request.getEventType());
+                }
             }
             case MEAN -> {
-                return meanOperation.execute(request, from);
+                entity.setValue(meanOperation.execute(request, from));
+                if(entity.getEventType() == null){
+                    validateEventType(request);
+                    entity.setEventType(request.getEventType());
+                }
             }
             case SUCCESS_RATE -> {
-                return successRateOperation.execute(request, from);
+                entity.setValue(successRateOperation.execute(request, from));
+                if(entity.getEventType() == null){
+                    entity.setEventType("task_success,task_wrong");
+                }
+            }
+            default -> {
+                throw new BusinessException(ErrorCode.BAD_REQUEST, "No such statistics type: " + request.getType() + "!");
             }
         }
-        throw new BusinessException(ErrorCode.BAD_REQUEST, "No such statistics type: " + request.getType() + "!");
+
     }
 
+    private void validateEventType(Statistic.StatisticRequest request){
+        if(request.getEventType().isEmpty()){
+            throw new BusinessException(ErrorCode.NOT_FOUND, "Empty event type!");
+        }
+        if(eventTypeRepository.findByEventName(request.getEventType()).block() == null){
+            throw new BusinessException(ErrorCode.NOT_FOUND, "No such event type name: " + request.getEventType() + "!");
+        }
+    }
 
     public Optional<StatisticEntity> findStatistic(Statistic.StatisticRequest request){
         UUID taskId = request.hasTaskId() ? UUID.fromString(request.getTaskId()) : null;

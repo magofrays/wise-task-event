@@ -1,4 +1,4 @@
-package ru.leti.wise.task.event.service.operations;
+package ru.leti.wise.task.event.service.grpc.operations;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import lombok.RequiredArgsConstructor;
