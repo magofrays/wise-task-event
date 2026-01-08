@@ -29,10 +29,10 @@ public interface EventRepository extends R2dbcRepository<Event, UUID> {
                                                            @Param("time") Instant time);
 
     @Query("""
-    SELECT s.task_id as task_id, s.user_id as user_id, COUNT(*) AS count
+    SELECT s.user_id as user_id, COUNT(*) AS count
     FROM event e
     JOIN session s ON s.id = e.session_id
-    JOIN event_type er ON et.id = e.event_type_id
+    JOIN event_type et ON et.id = e.event_type_id
     WHERE et.event_name = :eventType
         AND (:time IS NULL OR e.created_at > :time)
         AND s.task_id = :taskId
@@ -43,10 +43,10 @@ public interface EventRepository extends R2dbcRepository<Event, UUID> {
                                                      @Param("taskId") UUID taskId);
 
     @Query("""
-    SELECT s.task_id as task_id, s.user_id as user_id, COUNT(*) AS count
+    SELECT s.task_id as task_id, COUNT(*) AS count
     FROM event e
     JOIN session s ON s.id = e.session_id
-    JOIN event_type er ON et.id = e.event_type_id
+    JOIN event_type et ON et.id = e.event_type_id
     WHERE et.event_name = :eventType
         AND (:time IS NULL OR e.created_at > :time)
         AND s.user_id = :userId
@@ -60,7 +60,7 @@ public interface EventRepository extends R2dbcRepository<Event, UUID> {
     SELECT s.task_id as task_id, s.user_id as user_id, COUNT(*) AS count
     FROM event e
     JOIN session s ON s.id = e.session_id
-    JOIN event_type er ON et.id = e.event_type_id
+    JOIN event_type et ON et.id = e.event_type_id
     WHERE et.event_name = :eventType
         AND (:time IS NULL OR e.time > :time)
         AND s.user_id = :userId

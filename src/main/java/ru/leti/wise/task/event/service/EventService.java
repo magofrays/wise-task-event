@@ -47,7 +47,6 @@ public class EventService {
         return sessionRepository.findByUserIdAndTaskId(userId, taskId)
                 .switchIfEmpty(
                         sessionRepository.save(Session.builder()
-//                                .id(UUID.randomUUID())
                                 .createdAt(Timestamp.valueOf(LocalDateTime.now()))
                                 .taskId(taskId)
                                 .userId(userId)

@@ -14,7 +14,6 @@ import static ru.leti.wise.task.event.StatisticsServiceGrpc.*;
 @GrpcService
 @RequiredArgsConstructor
 public class StatisticsServiceGrpc extends StatisticsServiceImplBase {
-    private final GrpcErrorHandler errorHandler;
     private final GetCachedStatistic getCachedStatistic;
 
     @Override
