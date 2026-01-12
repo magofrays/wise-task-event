@@ -12,9 +12,10 @@ spring:
     pool:
       enabled: true
   cache:
-    caffeine:
-      spec: maximumSize=1000,expireAfterWrite=5m
-    cache-names: statistics
+    type: none
+#    caffeine:
+#      spec: maximumSize=1000,expireAfterWrite=10s
+#    cache-names: statistics
   liquibase:
     url: jdbc:postgresql://localhost:5433/wise_task_event
     user: wise_task_event
@@ -35,7 +36,7 @@ grpc:
 
 wise-task-event:
   statistics:
-    time-to-live: 3600
+    time-to-live: 1
 
 server:
   port: 8085

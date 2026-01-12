@@ -27,7 +27,7 @@ message StatisticResponse{
   google.protobuf.Timestamp update_at = 3;
   optional string task_id = 4;
   optional string user_id = 5;
-  double value = 6;
+  float value = 6;
   string event_type = 7;
 }
 

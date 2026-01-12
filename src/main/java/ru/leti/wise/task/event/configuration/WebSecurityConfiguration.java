@@ -12,9 +12,16 @@ import org.springframework.security.oauth2.jwt.NimbusReactiveJwtDecoder;
 import org.springframework.security.oauth2.jwt.ReactiveJwtDecoder;
 import org.springframework.security.web.server.SecurityWebFilterChain;
 import org.springframework.security.web.server.util.matcher.ServerWebExchangeMatchers;
+import org.springframework.web.cors.CorsConfiguration;
+import org.springframework.web.cors.reactive.CorsConfigurationSource;
+import org.springframework.web.cors.reactive.UrlBasedCorsConfigurationSource;
 import org.springframework.web.reactive.function.server.ServerResponse;
 
 import java.security.interfaces.RSAPublicKey;
+import java.time.Instant;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.Map;
 
 @Configuration
 @EnableWebFluxSecurity
@@ -28,18 +35,35 @@ public class WebSecurityConfiguration {
                 .withPublicKey(publicKey)
                 .build();
     }
+    @Bean
+    public CorsConfigurationSource corsConfigurationSource() {
+        CorsConfiguration configuration = new CorsConfiguration();
+        configuration.setAllowedOrigins(Collections.singletonList("*"));
+        configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS"));
+        configuration.setAllowedHeaders(Collections.singletonList("*"));
+        configuration.setAllowCredentials(false);
+        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+        source.registerCorsConfiguration("/**", configuration);
+        return source;
+    }
 
     @Bean
     @Order(1)
     public SecurityWebFilterChain securityFilterChain(ServerHttpSecurity http) {
         return http
-                .cors(ServerHttpSecurity.CorsSpec::disable)
+                .cors(cors -> cors.configurationSource(corsConfigurationSource()))
                 .csrf(ServerHttpSecurity.CsrfSpec::disable)
                 .exceptionHandling(exceptions -> exceptions
-                        .authenticationEntryPoint((exchange, ex) -> ServerResponse.status(401)
-                                .contentType(MediaType.APPLICATION_PROBLEM_JSON)
-                                .bodyValue(null)
-                                .then())
+                        .authenticationEntryPoint((exchange, ex) -> {
+                            return ServerResponse.status(401)
+                                    .contentType(MediaType.APPLICATION_JSON)
+                                    .bodyValue(Map.of(
+                                            "error", "Unauthorized",
+                                            "message", ex.getMessage(),
+                                            "timestamp", Instant.now().toString()
+                                    ))
+                                    .then();
+                        })
                 )
                 .authorizeExchange(exchanges -> exchanges
                         .anyExchange().authenticated()
@@ -50,12 +74,15 @@ public class WebSecurityConfiguration {
                 .build();
     }
 
+
+
     @Bean
     @Order(2)
     public SecurityWebFilterChain grpcSecurity(ServerHttpSecurity http) {
         return http
-                .cors(ServerHttpSecurity.CorsSpec::disable)
                 .securityMatcher(ServerWebExchangeMatchers.pathMatchers("/grpc/**"))
+                .cors(cors -> cors.configurationSource(corsConfigurationSource()))
+                .csrf(ServerHttpSecurity.CsrfSpec::disable)
                 .authorizeExchange(exchanges -> exchanges.anyExchange().permitAll())
                 .build();
     }

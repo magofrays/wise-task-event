@@ -20,7 +20,7 @@ public class StatisticEntity implements Serializable {
     private Statistic.StatisticScope scope;
     private Instant updatedAt;
     private Statistic.StatisticType type;
-    private Double value;
+    private Float value;
     @Column("task_id")
     private UUID taskId;
     @Column("user_id")
