@@ -20,14 +20,13 @@ import java.util.UUID;
 @Component
 @RequiredArgsConstructor
 public class GetCachedStatistic {
-    private final StatisticsProperties statisticsProperties;
     private final GetSuccessRateOperation successRateOperation;
     private final GetSumOperation sumOperation;
     private final GetMeanOperation meanOperation;
 
 
 
-//    @Cacheable(value = "statistics", key = "{#request.type, #request.scope, #request.eventType, #request.taskId, #request.userId}")
+    @Cacheable(value = "statistics", key = "{#request.type, #request.scope, #request.eventType, #request.taskId, #request.userId}")
     public Statistic.StatisticResponse getCachedStatistic(Statistic.StatisticRequest request){
         switch (request.getType()){
             case SUM -> {

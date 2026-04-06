@@ -6,37 +6,36 @@ spring:
     jwt:
       public-key: classpath:certs/public.pem
   r2dbc:
-    username: wise_task_event
-    password: wise_task_event
-    url: r2dbc:postgresql://localhost:5433/wise_task_event
+    username: ${EVENT_DB_USER}
+    password: ${EVENT_DB_PASSWORD}
+    url: r2dbc:postgresql://localhost:${EVENT_DB_PORT}/${EVENT_DB}
     pool:
       enabled: true
   cache:
-    type: none
-#    caffeine:
-#      spec: maximumSize=1000,expireAfterWrite=10s
-#    cache-names: statistics
+    type: caffeine
+    caffeine:
+      spec: ${CACHE_SPEC}
+    cache-names: statistics
   liquibase:
-    url: jdbc:postgresql://localhost:5433/wise_task_event
-    user: wise_task_event
-    password: wise_task_event
+    url: jdbc:postgresql://localhost:${EVENT_DB_PORT}/${EVENT_DB}
+    user: ${EVENT_DB_USER}
+    password: ${EVENT_DB_PASSWORD}
     change-log: classpath:liquibase/change-log-master.yaml
     enabled: true
 
 logging:
   level:
-    org.springframework.security: DEBUG
-    org.springframework.web: TRACE
-    org.springframework.r2dbc: TRACE
+    org.springframework.security: ${LOGGING_LEVEL}
+    org.springframework.web: ${LOGGING_LEVEL}
+    org.springframework.r2dbc: ${LOGGING_LEVEL}
 
 grpc:
   server:
-    port: 6569
-    reflection-service-enabled: true
+    port: ${EVENT_GRPC_PORT}
 
 wise-task-event:
   statistics:
-    time-to-live: 1
+    time-to-live: ${TIME_TO_LIVE_SECONDS}
 
 server:
-  port: 8085
+  port: ${EVENT_PORT}
